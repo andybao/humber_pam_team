@@ -184,11 +184,11 @@ class FormValidator {
 }
 
 $testArray = array (
-    'value' => 'wenyu.bao@gmail',
-    'alias' => 'Price',
+    'value' => 'wenyu.bao@gmail.com',
+    'alias' => 'email',
     'valueType' => 'string',
     'length' => false,
-    'regex' => email
+    'regex' => 'email'
 );
 
 $validator = new FormValidator();
