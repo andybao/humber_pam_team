@@ -7,7 +7,7 @@
  * - Pam Gao (n01193625)
  * - Kevin Wang [kevin.ztwang@gmail.com]
  * - Serena Liao [serenaliaojc@gmail.com]
- * - Uffa Butt [uffa.butt@gmail.com]
+ * - Uffa Butt (n00359711)
  * - Andy Bao (n01257490)
  *
  * 3. RESPONSIBILITY
