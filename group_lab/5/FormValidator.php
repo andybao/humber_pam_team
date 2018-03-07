@@ -1,13 +1,82 @@
 <?php
-/*
- * This class is developed for the lab 5 - Validation Library of course 5202
- * Team members:
- * - Pam Gao [pamela.gao@hotmail.com]
+/* Project introduction
+ * 1. OVERVIEW
+ * - This class is developed for the lab 5 - Validation Library of course 5202
+ *
+ * 2. TEAM MEMBERS
+ * - Pam Gao (n01193625)
  * - Kevin Wang [kevin.ztwang@gmail.com]
  * - Serena Liao [serenaliaojc@gmail.com]
  * - Uffa Butt [uffa.butt@gmail.com]
- * - Andy Bao [wenyu.bao@gmail.com]
+ * - Andy Bao (n01257490)
+ *
+ * 3. RESPONSIBILITY
+ * - All: strategy design, code review, comments
+ * - Pam: demo 2, testing
+ * - Kevin: public methods, 2 private methods: emptyStringCheck($input_array), regexCheck($input_array)
+ * - Serena: all other private methods
+ * - Uffa: demo 1, testing, English grammar check
+ * - Andy: strategy draft, code style modify
+ *
+ * 4. TIMELINE
+ * - 1 ~ 2 Mar.: Strategy design, responsibility discussion
+ * - 3 Mar.: define method(name, parameters, return value)
+ * - 4 Mar.: strategy draft (methods and comments), coding
+ * - 5 ~ 6 Mar.: coding
+ * - 7 Mar.: testing
  */
+
+/* Function introduction
+ * 1. OVERVIEW
+ *  1.1 This library get user input as an array, then check the array's format and the value's type, length, and format
+ *  1.2 This library return true if value is valid, otherwise, it will return an associative array (array's key is input_value's alias, and its value is an error msg)
+ *  1.3 User can add their own regular expression to do format check
+ *  1.4 Next step: develop multidimensional array as input parameter (TODO)
+ *
+ * 2. PRIVATE METHODS
+ *  2.1 Input parameter array format check
+ *   - Input array is an associative array, its keys are: value, alias, valueType, length, regex (check part4 for details)
+ *   - Private method parameterArrayKeyCheck($input_array) will check these keys, and trigger an error if the array format is invalid
+ *  2.2 Empty string check
+ *   - Input parameter is an array ($input_array), check $input_array['value'] is empty string or not
+ *   - Return true if string is not empty, otherwise, return error array as 1.2 mentioned
+ *  2.3 Type check
+ *   - Input parameter is an array ($input_array), check type of $input_array['value'] based on $input_array['valueType']
+ *   - Return true if value's type is valid, otherwise, return error array as 1.2 mentioned
+ *   - Only three types are supported: int, float, string
+ *   - An error will triggered if $input_array['valueType] is not one of three valid types
+ *  2.4 Length check
+ *   - Input parameter is an array ($input_array), check length of $input_array['value'] based on $input_array['length']
+ *   - Return true if value's length euqals expectation, otherwise, return error array as 1.2 mentioned
+ *   - $input_array['length'] should ba an positive interger, an error will be triggered if it is invalid
+ *   - This method checks string only, an error will be triggered if $input_array['valueType] is not a string
+ *   - This method only support equal opterator, use regexCheck($input_array) to handle not euqal situation
+ *  2.5 Format check
+ *   - regular expression is used for format check
+ *   - Input parameter is an array ($input_array), get regex alias from $input_array['regex'], then find regex form array $regexes by its alias
+ *   - Return true if value is valid, otherwise, return error array as 1.2 mentioned
+ *   - Trigger an error if regex alias cannot be found in array $regexes
+ *
+ * 3. PUBLIC METHODS
+ *  3.1 Construct
+ *   - It accepts an associative regex array as an optional parameter
+ *   - array's key is regex's alias, and its value is regex
+ *   - It call addNewregexes($userRegexes) to add input array to $regexes
+ *  3.2 Add a regex
+ *   - addNewregexes($userRegexes) accepts an associative regex array, and add it to $regexes
+ *  3.3 oneitemvalidate
+ *   - It accepts an associative array, then call different private method to check the value
+ *   - Check part 4 to get array detail
+ *
+ * 4. Array details
+ *  - 'value': the test value
+ *  - 'alias': It used for return error msg, it should be same as the text which is displayed in the HTML
+ *  - 'valueTyp': only support int, float, stirng, the library will not check type if this value is false
+ *  - 'length': only support a positive interger, the library will not check length if this value is false
+ *  - 'regex': only support the alias in the array $regexes, the library will not check format if this value is false
+ *
+ */
+
 class FormValidator {
     private $regexes = array(
         '2decimals' => '/^([1-9][0-9]*)+(.[0-9]{1,2})?$/',
