@@ -5,8 +5,8 @@
  *
  * 2. TEAM MEMBERS
  * - Pam Gao (n01193625)
- * - Kevin Wang [kevin.ztwang@gmail.com]
- * - Serena Liao [serenaliaojc@gmail.com]
+ * - Kevin Wang (n01255155)
+ * - Serena Liao (n01223460)
  * - Uffa Butt (n00359711)
  * - Andy Bao (n01257490)
  *
@@ -26,49 +26,52 @@
  * - 7 Mar.: testing
  */
 
-/* Function introduction
+/* Library introduction
  * 1. OVERVIEW
- *  1.1 This library get user input as an array, then check the array's format and the value's type, length, and format
- *  1.2 This library return true if value is valid, otherwise, it will return an associative array (array's key is input_value's alias, and its value is an error msg)
- *  1.3 User can add their own regular expression to do format check
- *  1.4 Next step: develop multidimensional array as input parameter (TODO)
+ *  1.1 This library gets an array from user, then check the array's format and the value's type, length, and format
+ *  1.2 This library returns true if value is valid, otherwise, it will return an associative array (array's key is input_value's alias, and its value is an error msg)
+ *  1.3 This library returns error by trigger_error() if syntax is wrong
+ *  1.4 User can add their own regular expression to do format check
+ *  1.5 Next step: develop method to valiate two values are same (TODO)
+ *  1.6 Next next step: develop multidimensional array as input parameter (TODO)
  *
  * 2. PRIVATE METHODS
- *  2.1 Input parameter array format check
+ *  2.1 parameterArrayKeyCheck($input_array)
  *   - Input array is an associative array, its keys are: value, alias, valueType, length, regex (check part4 for details)
  *   - Private method parameterArrayKeyCheck($input_array) will check these keys, and trigger an error if the array format is invalid
- *  2.2 Empty string check
+ *  2.2 emptyStringCheck($input_array)
  *   - Input parameter is an array ($input_array), check $input_array['value'] is empty string or not
  *   - Return true if string is not empty, otherwise, return error array as 1.2 mentioned
- *  2.3 Type check
+ *  2.3 typeCheck($input_array)
  *   - Input parameter is an array ($input_array), check type of $input_array['value'] based on $input_array['valueType']
  *   - Return true if value's type is valid, otherwise, return error array as 1.2 mentioned
  *   - Only three types are supported: int, float, string
+ *   - This method calls regexCheck($input_array) to do int and float type check
  *   - An error will triggered if $input_array['valueType] is not one of three valid types
- *  2.4 Length check
+ *  2.4 lengthCheck($input_array)
  *   - Input parameter is an array ($input_array), check length of $input_array['value'] based on $input_array['length']
  *   - Return true if value's length euqals expectation, otherwise, return error array as 1.2 mentioned
  *   - $input_array['length'] should ba an positive interger, an error will be triggered if it is invalid
- *   - This method checks string only, an error will be triggered if $input_array['valueType] is not a string
- *   - This method only support equal opterator, use regexCheck($input_array) to handle not euqal situation
- *  2.5 Format check
+ *   - This method checks string only, otherwise, return error array as 1.2 mentioned
+ *   - This method only supports equal opterator, use regexCheck($input_array) to handle not euqal situation
+ *  2.5 regexCheck($input_array)
  *   - regular expression is used for format check
  *   - Input parameter is an array ($input_array), get regex alias from $input_array['regex'], then find regex form array $regexes by its alias
  *   - Return true if value is valid, otherwise, return error array as 1.2 mentioned
  *   - Trigger an error if regex alias cannot be found in array $regexes
  *
  * 3. PUBLIC METHODS
- *  3.1 Construct
+ *  3.1 __construct(array $userRegexes = array())
  *   - It accepts an associative regex array as an optional parameter
  *   - array's key is regex's alias, and its value is regex
- *   - It call addNewregexes($userRegexes) to add input array to $regexes
- *  3.2 Add a regex
+ *   - It calls addNewregexes($userRegexes) to add input array to $regexes
+ *  3.2 addNewRegexes($userRegexes)
  *   - addNewregexes($userRegexes) accepts an associative regex array, and add it to $regexes
- *  3.3 oneitemvalidate
+ *  3.3 oneItemValidate($input_array)
  *   - It accepts an associative array, then call different private method to check the value
  *   - Check part 4 to get array detail
  *
- * 4. Array details
+ * 4. USER INPUT ARRAY DETAILS
  *  - 'value': the test value
  *  - 'alias': It used for return error msg, it should be same as the text which is displayed in the HTML
  *  - 'valueTyp': only support int, float, stirng, the library will not check type if this value is false
@@ -79,16 +82,21 @@
 
 class FormValidator {
     private $regexes = array(
-        '2decimals' => '/^([1-9][0-9]*)+(.[0-9]{1,2})?$/',
-        'email' => '/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/'
+        'price' => '/^[0-9.,]*(([.,][-])|([.,][0-9]{2}))?$/',
+        'email' => '/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/',
+        'post_code' => '/^([a-zA-Z]\d[a-zA-Z])\ {0,1}(\d[a-zA-Z]\d)$/',
+        'account' => '/^[a-zA-Z][a-zA-Z0-9_]{4,15}$/',
+        'phone' => '/^[0-9]{10,11}$/',
+        'integer' => '/^[-]?[0-9,]+$/',
+        'float' => '/^[+-]?([0-9]*[.])?[0-9]+$/'
     );
     const EMPTY_VALUE_WARNING_MSG = 'Value cannot be empty';
     const INVALID_VALUE_FORMAT_WARNING_MSG = 'Value format is invalid';
     const INVALID_VALUE_TYPE_WARNING_MSG = 'Following value type is expected: ';
     const INVALID_VALUE_LENGTH_WARNING_MSG = 'Following value length is expected: ';
+    const INVALID_LENGTH_VALUE_WARNING_MSG = 'Numbers are not supported by "lengthCheck": ';
     const UNSUPPORTED_VALUE_TYPE_WARNING_MSG = 'Following value type is not supported: ';
     const UNSUPPORTED_LENGTH_WARNING_MSG = '"lengthCheck" accepts positive integer as length only: ';
-    const UNSUPPORTED_LENGTH_VALUE_WARNING_MSG = 'Numbers are not supported by "lengthCheck": ';
     const UNSUPPORTED_REGEX_ALIAS_WARNING_MSG = 'Following regex alias is not supported: ';
     const UNSUPPORTED_PARAMETER_ARRAY_KEY_WARNING_MSG = 'Following parameter array key is not supported: ';
     const PARAMETER_ARRAY_KEY = array('value', 'alias', 'valueType', 'length', 'regex');
@@ -152,17 +160,19 @@ class FormValidator {
             $t = $input_array['valueType'];
             switch($t){
                 case 'int':
-                    if(!is_int($i)) {
+                    $input_array['regex'] = 'integer';
+                    if($this->regexCheck($input_array) !== true) {
                         return $this->generateReturnArray($input_array['alias'], self::INVALID_VALUE_TYPE_WARNING_MSG . $t);
                     }
                     break;
                 case 'float':
-                    if(!is_float($i)) {
+                    $input_array['regex'] = 'float';
+                    if($this->regexCheck($input_array) !== true) {
                         return $this->generateReturnArray($input_array['alias'], self::INVALID_VALUE_TYPE_WARNING_MSG . $t);
                     }
                     break;
                 case 'string':
-                    if(!is_string($i)) {
+                    if(is_numeric($i)) {
                         return $this->generateReturnArray($input_array['alias'], self::INVALID_VALUE_TYPE_WARNING_MSG . $t);
                     }
                     break;
@@ -192,8 +202,7 @@ class FormValidator {
                     return false;
                 }
             } else {
-                trigger_error(self::UNSUPPORTED_LENGTH_VALUE_WARNING_MSG . $i);
-                return false;
+                return $this->generateReturnArray($input_array['alias'], self::INVALID_LENGTH_VALUE_WARNING_MSG . $i);
             }
         } else {
             return $emptyStringCheckResult;
@@ -263,6 +272,6 @@ $testArray = array (
 $validator = new FormValidator();
 $test = $validator->oneItemValidate($testArray);
 //$testArray = $validator->testIt($testArray);
-print_r ($test);
-print $test . PHP_EOL;
+//print_r ($test);
+//print $test . PHP_EOL;
 ?>
